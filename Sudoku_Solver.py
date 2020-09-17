@@ -1,15 +1,16 @@
 import numpy as np
 import pygame
 import time
+import random
 
 pygame.font.init()
-
 
 class Board:
 
     def __init__(self, rows, columns):
         self.rows = rows
         self.cols = columns
+        self.num_sol = 0
         self.board = np.array([
             [0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -91,90 +92,66 @@ class Board:
 
         return True
 
-    def solve(self):
+    def create(self):
         row, col, box_x, box_y = self.find(self.board)
         if (row == -1):
             return 1
-        for i in range(1, 10):
-            if (self.check_val(i, row, col, box_x, box_y)):
-                self.board[row][col] = i
-                if (self.solve() == 1):
+        rand_num = np.array([1,2,3,4,5,6,7,8,9])
+        random.shuffle(rand_num)
+        for i in range(9):
+            if (self.check_val(rand_num[i], row, col, box_x, box_y)):
+                self.board[row][col] = rand_num[i]
+                if (self.create() == 1):
                     return 1
                 self.board[row][col] = 0
         return 2
 
-    def randomize_grid(self):
-        rand_r = [np.random.randint(0, 3), np.random.randint(
-            3, 6), np.random.randint(6, 9)]
-        rand_c = [np.random.randint(0, 3), np.random.randint(
-            3, 6), np.random.randint(6, 9)]
-        for cycle in range(2):
-            if (cycle == 0):
-                for i in range(3):
-                    for j in range(9):
-                        numbers_tried = {0}
-                        temp = np.random.randint(1, 10)
-                        while (self.check_val(temp, rand_r[i], j, rand_r[i] % 3, j % 3) == False and len(numbers_tried) < 9):
-                            numbers_tried.add(temp)
-                            temp = np.random.randint(1, 10)
-                        if (self.check_val(temp, j, rand_c[i], j % 3, rand_c[i] % 3) == False):
-                            return False
-                        self.board[rand_r[i]][j]= temp
-            else:
-                for i in range(3):
-                    for j in range(0, 9):
-                        numbers_tried = {0}
-                        if (self.board[j][rand_c[i]] == 0):
-                            temp = np.random.randint(1, 10)
-                            while (self.check_val(temp, j, rand_c[i], j % 3, rand_c[i] % 3) == False and len(numbers_tried) < 9):
-                                numbers_tried.add(temp)
-                                temp = np.random.randint(1, 10)
-                            if (self.check_val(temp, j, rand_c[i], j % 3, rand_c[i] % 3) == False):
-                                return False
-                            self.board[j][rand_c[i]] = temp
-        return True
+    def solve(self):
+        row, col, box_x, box_y = self.find(self.board)
+        if (row == -1):
+            return 3
+        for i in range(1, 10):
+            if (self.check_val(i, row, col, box_x, box_y)):
+                self.board[row][col] = i
+                if (self.solve() == 3):
+                    self.num_sol += 1
+                self.board[row][col] = 0
+        return 2
 
+    def delete(self):
+        row = [0,0,0]
+        col = [0,0,0]
+        prev_val = [0,0,0]
+        for i in range(3):
+            while (True):
+                row[i] = np.random.randint(0,9)
+                col[i] = np.random.randint(0,9)
+                if (self.board[row[i]][col[i]] != 0):
+                    prev_val[i] = self.board[row[i]][col[i]]
+                    self.board[row[i]][col[i]] = 0
+                    break
 
-class Game:
+        self.solve()
 
-    def __init__(self, rows, columns, width, height, board):
-        self.rows = rows
-        self.cols = columns
-        self.board = board
-        #self.cubes = [[Cube(self.board[i][j], i, j, width, height) for j in range(cols)] for i in range(rows)]
-        #self.width = width
-        #self.height = height
-        #self.model = None
-        # self.update_model()
-        #self.selected = None
+        if (self.num_sol == 1):
+            self.num_sol = 0
+            self.delete()
+        else:
+            for i in range(3):
+                self.board[row[i]][col[i]] = prev_val[i]
+            self.num_sol = 0
+            return True
 
+board_complete = Board(9, 9)
 
-board1 = Board(9, 9)
+val_board = board_complete.create()
 
-val_board = board1.randomize_grid()
+board_game = Board(9,9)
+board_game.board = board_complete.board.copy()
 
-if (val_board == True):
-    print("There is a board")
-else:
-    print("The board was bad")
+board_game.delete()
 
-
-"""
-game1 = Game(9, 9, 540, 540, board1.board)
-
-x = game1.solve()
-sol = 0
-
-while (x != 2):
-    sol += x
-    x = game1.solve()
-
-if (x == 1):
-    print("there are thi many solutions: ")
-    print(sol)
-else:
-    print("there is no solution")
-
-"""
+print(board_complete.board)
+print(board_game.board)
 
 # https://github.com/techwithtim/Sudoku-GUI-Solver
