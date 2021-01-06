@@ -293,7 +293,7 @@ def board_completed(game1, start_time):
     game1.game_screen.fill(Game.BLUE)
     text1 = game1.font_game.render("You Win With " + str(game1.mistakes) + " Mistakes", 1, (0, 0, 0))
     game1.game_screen.blit(text1, (10, 200))
-    text2 = game1.font_game.render("And In " + get_time(round (time.time() - start_time)) + " Min", 1, (0, 0, 0))
+    text2 = game1.font_game.render("In " + get_time(round (time.time() - start_time)) + " Min", 1, (0, 0, 0))
     game1.game_screen.blit(text2, (10, 250))
     pygame.display.update()
 
@@ -368,6 +368,3 @@ def main():
 
 main()
 pygame.quit()
-
-# Initial idea and mild Inspiration From:
-# https://github.com/techwithtim/Sudoku-GUI-Solver
